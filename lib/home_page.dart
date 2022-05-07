@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:product_offline_app/add_product.dart';
 import 'package:product_offline_app/databsehelper.dart';
 import 'package:product_offline_app/product.dart';
 
@@ -46,14 +47,23 @@ class _HomePageState extends State<HomePage> {
           actions: [
             IconButton(
                 onPressed: () {
-                  DatabaseHelper.instance.addProduct(Product(
-                      title: "Iphone" + Random().nextInt(500).toString(),
-                      description: "This is Description"));
                   refreshProduct();
                 },
-                icon: Icon(Icons.add))
+                icon: Icon(Icons.refresh))
           ],
           title: Text("PMS"),
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () async {
+            await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AddorUpdateProduct(true,
+                        p: Product(id: 1, description: "", title: ""))));
+
+            refreshProduct();
+          },
         ),
         body: loading
             ? Center(
@@ -67,6 +77,67 @@ class _HomePageState extends State<HomePage> {
                       return ListTile(
                         title: Text(products[i].title),
                         subtitle: Text(products[i].description),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(
+                                Icons.edit,
+                                size: 20.0,
+                                color: Colors.brown[900],
+                              ),
+                              onPressed: () async {
+                                await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            AddorUpdateProduct(
+                                              false,
+                                              p: products[i],
+                                            )));
+
+                                refreshProduct();
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                size: 20.0,
+                                color: Colors.brown[900],
+                              ),
+                              onPressed: () async {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text("Do you want to  delete?"),
+                                        actions: [
+                                          ElevatedButton(
+                                              onPressed: () async {
+                                                bool result =
+                                                    await DatabaseHelper
+                                                        .instance
+                                                        .deleteProduct(
+                                                            products[i].id!);
+                                                if (result) {
+                                                  refreshProduct();
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text("Confirm Delete")),
+                                          OutlinedButton(
+                                              onPressed: () {
+                                                // Go Back
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text("Cancel"))
+                                        ],
+                                      );
+                                    });
+                              },
+                            ),
+                          ],
+                        ),
                       );
                     }));
   }

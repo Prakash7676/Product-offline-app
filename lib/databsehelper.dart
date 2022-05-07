@@ -57,4 +57,39 @@ class DatabaseHelper {
     final db = await instance.database;
     db.close();
   }
+
+  //delete
+  Future<bool> deleteProduct(int id) async {
+    try {
+      // Get a reference to the database.
+      final db = await instance.database;
+
+      // Remove the product from the database.
+      await db.delete(
+        tableName,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      return true;
+    } catch (ex) {
+      return false;
+    }
+  }
+
+  Future<bool> updateProduct(Product p) async {
+    // Get a reference to the database.
+    try {
+      final db = await database;
+
+      await db.update(
+        tableName,
+        p.toMap(),
+        where: 'id = ?', //if we put value instead of ? than hacker will hack it
+        whereArgs: [p.id],
+      );
+      return true;
+    } catch (ex) {
+      return false;
+    }
+  }
 }
